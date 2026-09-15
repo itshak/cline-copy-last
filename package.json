@@ -1,1 +1,81 @@
-{"name": "cline-copy-last", "version": "1.0.0", "description": "Cline plugin that adds a /copy-last slash command to copy the last Cline session message (assistant response, user prompt, or conversation pair) to your clipboard as markdown.", "keywords": ["cline", "plugin", "copy", "clipboard", "last", "message", "slash-command", "copy-last"], "license": "MIT", "author": "cline-copy-last contributors", "main": "index.js", "exports": { ".": "./index.js" }, "cline": {"plugins": [{"paths": ["./index.js"], "capabilities": ["commands", "hooks"]}]}, "engines": {"node": ">=18.0.0"}, "files": ["index.js", "README.md", "LICENSE"], "repository": { "type": "git", "url": "https://github.com/cline/cline-copy-last.git" }, "bugs": { "url": "https://github.com/cline/cline-copy-last/issues" }, "homepage": "https://github.com/cline/cline-copy-last#readme", "scripts": { "test": "node -e \"const p=require('./index.js'); console.log('Plugin loaded:', p.name || p.default?.name || 'unknown'); process.exit(0)\"" }, "publishConfig": { "access": "public" }}
+{
+  "name": "cline-copy-last",
+  "version": "1.0.0",
+  "description": "Copy recent agent, user, or user-agent messages from the current Cline session.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itshak/cline-copy-last.git"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "cline": {
+    "plugins": [
+      {
+        "paths": ["./dist/index.js"],
+        "capabilities": ["commands"]
+      }
+    ]
+  },
+  "scripts": {
+    "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "package": "npm pack",
+    "pack:dry-run": "npm publish --dry-run",
+    "publish:npm": "npm publish --access public"
+  },
+  "keywords": [
+    "cline",
+    "cline-plugin",
+    "clipboard",
+    "copy-last",
+    "ai"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/itshak/cline-copy-last#readme",
+  "bugs": {
+    "url": "https://github.com/itshak/cline-copy-last/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "clipboardy": "5.3.1"
+  },
+  "devDependencies": {
+    "@cline/core": "0.0.83",
+    "@types/node": "25.9.1",
+    "eslint": "10.4.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.60.1",
+    "vitest": "4.1.8"
+  },
+  "peerDependencies": {
+    "@cline/core": "*"
+  },
+  "peerDependenciesMeta": {
+    "@cline/core": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
