@@ -6,25 +6,70 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          node-version: "20"
+          fetch-depth: 0
+
+      - name: Derive version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Tag $TAG does not match vX.Y.Z — aborting" >&2
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify package version matches tag
+        env:
+          EXPECTED_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$PACKAGE_VERSION" != "$EXPECTED_VERSION" ]; then
+            echo "Tag version $EXPECTED_VERSION does not match package.json version $PACKAGE_VERSION" >&2
+            echo "Bump package.json to $EXPECTED_VERSION first, then re-tag." >&2
+            exit 1
+          fi
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
           registry-url: "https://registry.npmjs.org"
+          cache: "npm"
 
-      - run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npm test
+      - name: Run checks
+        run: npm run check
 
-      - run: npm publish
+      - name: Pack tarball for Release attachment
+        run: npm pack
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          # Attach the packed tarball so the Release carries the exact artifact published to npm
+          files: cline-copy-last-${{ steps.version.outputs.version }}.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
