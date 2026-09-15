@@ -105,6 +105,35 @@ cline plugin install /path/to/cline-copy-last
 cline plugin uninstall cline-copy-last
 ```
 
+## Publishing to npm
+
+### npm authentication
+
+1. Create an npm access token at https://www.npmjs.com/settings/-/tokens
+2. Add it as a GitHub secret:
+   ```bash
+   gh secret set NPM_TOKEN
+   ```
+   Paste your npm token when prompted (values are encrypted at rest).
+
+### Via GitHub Actions (auto-publish on version tag)
+
+Push a version tag to trigger automatic publishing:
+
+```bash
+git tag v1.0.0
+git push --tags
+```
+
+The `publish.yml` workflow will automatically run `npm publish` when a tag matching `v*` is pushed.
+
+### Manual publish
+
+```bash
+npm login
+npm publish --access public
+```
+
 ## Building for npm publish
 
 ```bash
