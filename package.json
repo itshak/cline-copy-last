@@ -1,6 +1,6 @@
 {
   "name": "cline-copy-last",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Copy recent agent, user, or user-agent messages from the current Cline session.",
   "repository": {
     "type": "git",
@@ -24,8 +24,12 @@
   "cline": {
     "plugins": [
       {
-        "paths": ["./dist/index.js"],
-        "capabilities": ["commands"]
+        "paths": [
+          "./dist/index.js"
+        ],
+        "capabilities": [
+          "commands"
+        ]
       }
     ]
   },
